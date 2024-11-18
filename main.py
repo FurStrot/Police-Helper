@@ -59,8 +59,8 @@ class App(QMainWindow):
         self.btn_regisn_number.hide()
 
     def show_registration(self):
-        self.registration.show()
         self.btn_regisn_number.hide()
+        self.registration.show()
 
     def open_webbrowser(self):
         url = "https://github.com/FurStrot"
@@ -89,7 +89,7 @@ class App(QMainWindow):
             "Color": color,
             "Brand": brand,
             "Model": model,
-            "Status": status
+            "Still": status
         }
 
         missing_fields = [field_name for field_name, value in fields.items() if not value]
@@ -103,39 +103,46 @@ class App(QMainWindow):
             msg.exec()
             return
 
-        car_info = {
-            "number": number,
-            "name": name,
-            "color": color,
-            "brand": brand,
-            "model": model,
-            "still": status
-        }
-
-        self.number_cars.append(car_info)
-
-        with open("car_infos.json", "w") as file:
-            json.dump(self.number_cars, file)
+        for index, car in enumerate(self.number_cars):
+            if car["number"] == number:
+                self.number_cars[index] = {
+                    "number": number,
+                    "name": name,
+                    "color": color,
+                    "brand": brand,
+                    "model": model,
+                    "status": status
+                }
+                break
+        else:
+            car_info = {
+                "number": number,
+                "name": name,
+                "color": color,
+                "brand": brand,
+                "model": model,
+                "status": status
+            }
+            self.number_cars.append(car_info)
 
         with open("car_infos.json", "w") as file:
             json.dump(self.number_cars, file)
 
     def found_number(self):
+        font = QFont("Impact", 8, QFont.Weight.Bold, italic=True)
+        font.setPointSize(20)
+
+        self.cn_info_number.setFont(font)
+        self.cn_info_name.setFont(font)
+        self.cn_info_color.setFont(font)
+        self.cn_info_breand.setFont(font)
+        self.cn_info_model.setFont(font)
+        self.cn_info_still.setFont(font)
         try:
             found = False
             car_number = self.line_car_number.text()
             for car in self.number_cars:
                 if car["number"] == car_number:
-                    font = QFont("Impact", 8, QFont.Weight.Bold, italic=True)
-                    font.setPointSize(20)
-
-                    self.cn_info_number.setFont(font)
-                    self.cn_info_name.setFont(font)
-                    self.cn_info_color.setFont(font)
-                    self.cn_info_breand.setFont(font)
-                    self.cn_info_model.setFont(font)
-                    self.cn_info_still.setFont(font)
-
                     self.cn_info_number.setText(car["number"])
                     self.cn_info_name.setText(car["name"])
                     self.cn_info_color.setText(car["color"])
