@@ -1,5 +1,4 @@
-
-![Logo](https://github.com/FurStrot/Police-Helper/blob/main/readme_photo/logo.png?raw=true)
+![Logo](https://github.com/FurStrot/Police-Helper/blob/main/readme_photo/foto.jpg?raw=true)
 
 # US
 ## Police Helper
