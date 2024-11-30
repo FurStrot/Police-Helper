@@ -16,48 +16,56 @@ class HandleUser:
 
 
     def receiver(self):
-        while True:
-            data = self.conn.recv(1024 * 16)
-            if not data:
-                self.disconnect()
-                return
+        try:
+            while True:
+                data = self.conn.recv(1024 * 16)
+                if not data:
+                    self.disconnect()
+                    return
 
-            self.handle_object(pickle.loads(data))
+                self.handle_object(pickle.loads(data))
+        except Exception as ex:
+            print(f"receiver: Error: {ex}")
+            self.disconnect()
 
     def handle_object(self, object:NetworkObject):
+        try:
+            print(f"Received object:{object}")
 
-        print(f"Received object:{object}")
+            if isinstance(object, Auth):
+                if object.password not in ["zzz1234Z1"]: # change list to somthing else (workaround)
+                    print("invalid password")
+                    self.disconnect()
+                    return
+                self.user.SendObject(AuthAnswer())
 
-        if isinstance(object, Auth):
-            if object.password not in ["zzz1234Z1"]: # change list to somthing else (workaround)
-                print("invalid password")
-                self.disconnect()
-                return
-            self.user.SendObject(AuthAnswer())
+            if isinstance(object, RequestCarNumbers):
+                self.user.SendObject(CarNumbers([car.number for car in read_db()]))
 
-        if isinstance(object, RequestCarNumbers):
-            self.user.SendObject(CarNumbers([car.number for car in read_db()]))
+            if isinstance(object, RegisterCar):
+                write_to_db(Car(object.number, object.name, object.color, object.brand, object.model, object.stolen))
 
-        if isinstance(object, RegisterCar):
-            write_to_db(Car(object.number, object.name, object.color, object.brand, object.model, object.still))
+            if isinstance(object, RequestInfoByNumber):
+                db = read_db()
+                print(db)
+                car: None | Car = None
+                for _car in db:
+                    if _car.number == object.number:
+                        car = _car
+                if car:
+                    self.user.SendObject(InfoByNumberAnswer(
+                        True,
+                        car.number,
+                        car.name,
+                        car.color,
+                        car.brand,
+                        car.model,
+                        car.stolen
+                    ))
+                else:
+                    self.user.SendObject(InfoByNumberAnswer(False))
+        except Exception as ex:
+            print(f"handle_object: Error: {ex}")
+            self.disconnect()
 
-        if isinstance(object, RequestInfoByNumber):
-            db = read_db()
-            print(db)
-            car: None | Car = None
-            for _car in db:
-                if _car.number == object.number:
-                    car = _car
-            if car:
-                self.user.SendObject(InfoByNumberAnswer(
-                    True,
-                    car.number,
-                    car.name,
-                    car.color,
-                    car.brand,
-                    car.model,
-                    car.stealed
-                ))
-            else:
-                self.user.SendObject(InfoByNumberAnswer(False))
 

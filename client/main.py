@@ -25,7 +25,7 @@ class App(QMainWindow):
         self.server_address = ("127.0.0.1", 9090)
         self.connect_to_server()
         self.send_object(Auth(config.password))
-        if self.receive_and_handle(): # imagine here that we got AuthAnswer
+        if self.receive_and_handle():
             print("Authenticated")
         else:
             QMessageBox.critical(self, "Authentication Error", f"Password may be incorrect")
@@ -158,9 +158,6 @@ class App(QMainWindow):
 
         QMessageBox.information(self, "Success", "Car registered successfully.")
 
-        with open("client/car_infos.json", "w") as file:
-            json.dump(self.number_cars, file)
-
     def found_number(self):
         font = QFont("Impact", 8, QFont.Weight.Bold, italic=True)
         font.setPointSize(20)
@@ -182,7 +179,7 @@ class App(QMainWindow):
             self.cn_info_color.setText(response.color)
             self.cn_info_breand.setText(response.brand)
             self.cn_info_model.setText(response.model)
-            self.cn_info_still.setText(response.stealed) #stealed
+            self.cn_info_still.setText(response.stolen) #stealed
         else:
             self.show_error_message("Car not found.")
 

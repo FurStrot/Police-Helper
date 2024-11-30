@@ -33,7 +33,7 @@
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>../../Downloads/Vmake-1731786047(1).png</pixmap>
+     <pixmap>assets/Vmake-1731786047(1).png</pixmap>
     </property>
    </widget>
    <widget class="QPushButton" name="btn_car_number">
@@ -122,7 +122,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>../../Downloads/photo_2024-11-16_23-25-47.jpg</pixmap>
+      <pixmap>assets/photo_2024-11-16_23-25-47.jpg</pixmap>
      </property>
     </widget>
     <widget class="QLabel" name="label">
@@ -651,7 +651,7 @@
       <rect>
        <x>410</x>
        <y>500</y>
-       <width>131</width>
+       <width>141</width>
        <height>71</height>
       </rect>
      </property>
@@ -661,7 +661,7 @@
       </font>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:26pt; color:#ffffff;&quot;&gt;STILL -&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:26pt; color:#ffffff;&quot;&gt;STOLEN -&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
     <widget class="QLabel" name="cn_info_number">
@@ -757,7 +757,7 @@
     <widget class="QLabel" name="cn_info_still">
      <property name="geometry">
       <rect>
-       <x>510</x>
+       <x>530</x>
        <y>500</y>
        <width>131</width>
        <height>71</height>
@@ -855,7 +855,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>../../Downloads/Vmake-1731785244.jpg</pixmap>
+      <pixmap>assets/Vmake-1731785244.jpg</pixmap>
      </property>
     </widget>
     <widget class="QLabel" name="label_3">
@@ -1483,14 +1483,14 @@
        <x>0</x>
        <y>-30</y>
        <width>1241</width>
-       <height>431</height>
+       <height>411</height>
       </rect>
      </property>
      <property name="text">
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>../../Downloads/photo_2024-11-16_23-22-43.jpg</pixmap>
+      <pixmap>assets/photo_2024-11-16_23-22-43.jpg</pixmap>
      </property>
     </widget>
     <widget class="QLabel" name="label_5">
@@ -1939,7 +1939,7 @@
       </font>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:26pt; color:#ffffff;&quot;&gt;STILL&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:26pt; color:#ffffff;&quot;&gt;STOLEN&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
     <widget class="QLabel" name="crn_name">
@@ -2119,7 +2119,7 @@
     <widget class="QLineEdit" name="line_still">
      <property name="geometry">
       <rect>
-       <x>490</x>
+       <x>520</x>
        <y>520</y>
        <width>111</width>
        <height>31</height>
