@@ -1,5 +1,8 @@
 import socket
 import json
+import config
 
 sock = socket.socket()
-sock.connect((', 9999))
+sock.connect((config.server_adress, config.server_port))
+
+

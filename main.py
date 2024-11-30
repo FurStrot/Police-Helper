@@ -1,19 +1,34 @@
+import pickle
 import sys
 import os
 import json
 import webbrowser
 import subprocess
-
+import socket
+import threading
 from PyQt6 import uic
 from PyQt6.QtWidgets import QMainWindow, QApplication, QMessageBox
 from PyQt6.QtGui import QFont
+from time import sleep
+import config
+from API.NetworkObjects import *
 
 
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
         self.side_1 = uic.loadUi('police_helper.ui', self)
+
         self.connect()
+
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_address = ("127.0.0.1", 9090)
+        self.connect_to_server()
+        self.send_object(Auth(config.password))
+        if self.receive_and_handle(): # imagine here that we got AuthAnswer
+            print("Authenticated")
+        else:
+            QMessageBox.critical(self, "Authentication Error", f"Password may be incorrect")
 
         self.ticket_information = []
         self.number_cars = []
@@ -22,29 +37,29 @@ class App(QMainWindow):
         self.ticket.hide()
         self.registration.hide()
 
-        if os.path.exists("car_infos.json"):
-            with open("car_infos.json", "r") as file:
-                self.number_cars = json.load(file)
+        threading.Thread(target=self.numbers_update_cycle).start()
 
-        if os.path.exists("ticket.json"):
-            with open("ticket.json", "r") as file:
+        if os.path.exists("client/ticket.json"):
+            with open("client/ticket.json", "r") as file:
                 self.ticket_information = json.load(file)
 
+    def numbers_update_cycle(self):
+        while True:
+            self.send_object(RequestCarNumbers())
+            self.receive_and_handle()
+            sleep(20)
+
     def connect(self):
-        #menu
         self.btn_tikcet.clicked.connect(self.show_ticket)
         self.btn_car_number.clicked.connect(self.show_car_numbers)
         self.btn_regisn_number.clicked.connect(self.show_registration)
         self.btn_furstrot.clicked.connect(self.open_webbrowser)
         self.btn_create.clicked.connect(self.create_ticket)
 
-        #show_car_numbder
         self.btn_find.clicked.connect(self.found_number)
 
-        #create_car_number
         self.crn_btn_create.clicked.connect(self.add_number)
 
-        #exits
         self.btn_exit.clicked.connect(self.exit)
         self.cn_btn_exit.clicked.connect(self.back_menu)
         self.t_btn_exit.clicked.connect(self.back_menu)
@@ -73,7 +88,42 @@ class App(QMainWindow):
         self.btn_regisn_number.show()
 
     def exit(self):
+        self.socket.close()
         sys.exit()
+
+    def connect_to_server(self):
+        try:
+            self.socket.connect(self.server_address)
+            print("Connected to server")
+        except Exception as e:
+            QMessageBox.critical(self, "Connection Error", f"Error connecting to server: {e}")
+            sys.exit()
+
+    def send_object(self, obj):
+        serialized_object = NetworkObject.serialize(obj)
+        self.socket.send(serialized_object)
+
+    def create_ticket(self):
+        ticket_info = {
+            "badge_number": self.t_line_badge.text(),
+            "name_officer": self.t_line_name_officer.text(),
+            "name_pepole": self.t_line_name.text(),
+            "order": self.t_line_order.text(),
+            "sum_order": self.sum_order.value(),
+        }
+
+        self.ticket_information.append(ticket_info)
+
+        with open("client/ticket.json", "w") as file:
+            json.dump(self.ticket_information, file)
+
+        with open("client/ticket_give.txt", "w") as file:
+            file.write(
+                f"Name officer: {ticket_info['name_officer']}, badge number: {ticket_info['badge_number']}\n"
+                f"\nName citizen: {ticket_info['name_pepole']}\n\n"
+                f"Sum order: ${ticket_info['sum_order']}\n\n")
+
+        subprocess.run(["notepad", "client/ticket_give.txt"])
 
     def add_number(self):
         number = self.line_number.text()
@@ -103,29 +153,12 @@ class App(QMainWindow):
             msg.exec()
             return
 
-        for index, car in enumerate(self.number_cars):
-            if car["number"] == number:
-                self.number_cars[index] = {
-                    "number": number,
-                    "name": name,
-                    "color": color,
-                    "brand": brand,
-                    "model": model,
-                    "status": status
-                }
-                break
-        else:
-            car_info = {
-                "number": number,
-                "name": name,
-                "color": color,
-                "brand": brand,
-                "model": model,
-                "status": status
-            }
-            self.number_cars.append(car_info)
+        register_car_obj = RegisterCar(number, name, color, brand, model, status)
+        self.send_object(register_car_obj)
 
-        with open("car_infos.json", "w") as file:
+        QMessageBox.information(self, "Success", "Car registered successfully.")
+
+        with open("client/car_infos.json", "w") as file:
             json.dump(self.number_cars, file)
 
     def found_number(self):
@@ -138,57 +171,57 @@ class App(QMainWindow):
         self.cn_info_breand.setFont(font)
         self.cn_info_model.setFont(font)
         self.cn_info_still.setFont(font)
-        try:
-            found = False
-            car_number = self.line_car_number.text()
-            for car in self.number_cars:
-                if car["number"] == car_number:
-                    self.cn_info_number.setText(car["number"])
-                    self.cn_info_name.setText(car["name"])
-                    self.cn_info_color.setText(car["color"])
-                    self.cn_info_breand.setText(car["brand"])
-                    self.cn_info_model.setText(car["model"])
-                    self.cn_info_still.setText(car["status"])
-                    found = True
-                    break
 
-            if not found:
-                self.cn_info_number.setText("ERROR")
-                self.cn_info_name.setText("ERROR")
-                self.cn_info_color.setText("ERROR")
-                self.cn_info_breand.setText("ERROR")
-                self.cn_info_model.setText("ERROR")
-                self.cn_info_still.setText("ERROR")
+        car_number = self.line_car_number.text()
+        self.send_object(RequestInfoByNumber(car_number))
+        response = self.receive_and_handle()
 
-        except Exception as ex:
-            print(ex)
+        if response.found:
+            self.cn_info_number.setText(response.number)
+            self.cn_info_name.setText(response.name)
+            self.cn_info_color.setText(response.color)
+            self.cn_info_breand.setText(response.brand)
+            self.cn_info_model.setText(response.model)
+            self.cn_info_still.setText(response.stealed) #stealed
+        else:
+            self.show_error_message("Car not found.")
 
-    def create_ticket(self):
-        ticket_info = {
-            "badge_number": self.t_line_badge.text(),
-            "name_officer": self.t_line_name_officer.text(),
-            "name_pepole": self.t_line_name.text(),
-            "order": self.t_line_order.text(),
-            "sum_order": self.sum_order.value(),
-        }
+    def show_error_message(self, message):
+        self.cn_info_number.setText("ERROR")
+        self.cn_info_name.setText("ERROR")
+        self.cn_info_color.setText("ERROR")
+        self.cn_info_breand.setText("ERROR")
+        self.cn_info_model.setText("ERROR")
+        self.cn_info_still.setText("ERROR")
+        QMessageBox.warning(self, "Error", message)
 
-        self.ticket_information.append(ticket_info)
+    def receive_and_handle(self):
+        while True:
+            data = self.socket.recv(1024 * 16)
+            if not data:
+                return False
 
-        with open("ticket.json", "w") as file:
-            json.dump(self.ticket_information, file)
+            return self.handle_object(pickle.loads(data))
 
-        with open("ticket_give.txt", "w") as file:
-            file.write(
-                f"Name officer: {ticket_info["name_officer"]}, badge number: {ticket_info["badge_number"]}"
-                f"\n\nName citizen: {ticket_info["name_pepole"]}\n\n"
-                f"Sum order: ${ticket_info["sum_order"]}\n\n")
+    def handle_object(self, object:NetworkObject):
+        if isinstance(object, AuthAnswer):
+            return True
 
-        subprocess.run(["notepad", "ticket_give.txt"])
+        if isinstance(object, CarNumbers):
+            self.number_cars = object.numbers # can replace extend to =
+            return True
+
+        if isinstance(object, InfoByNumberAnswer):
+            return object
+
+        return False
 
 
 if __name__ == "__main__":
-     app = QApplication(sys.argv)
-     ex = App()
-     app.setStyle('windows11')
-     ex.show()
-     sys.exit(app.exec())
+    app = QApplication(sys.argv)
+    ex = App()
+    app.setStyle('windows11')
+    ex.show()
+    sys.exit(app.exec())
+
+#TODO: Нужно сделать получение номеров маашин и получение информации по номеру
