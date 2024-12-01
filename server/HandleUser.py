@@ -14,7 +14,6 @@ class HandleUser:
     def disconnect(self):
         self.conn.close()
 
-
     def receiver(self):
         try:
             while True:

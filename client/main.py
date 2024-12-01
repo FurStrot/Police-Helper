@@ -29,7 +29,6 @@ class App(QMainWindow):
         else:
             QMessageBox.critical(self, "Authentication Error", f"Password may be incorrect")
 
-        self.ticket_information = []
         self.number_cars = []
 
         self.car_numbder.hide()
@@ -37,10 +36,6 @@ class App(QMainWindow):
         self.registration.hide()
 
         threading.Thread(target=self.numbers_update_cycle).start()
-
-        if os.path.exists("client/ticket.json"):
-            with open("client/ticket.json", "r") as file:
-                self.ticket_information = json.load(file)
 
     def numbers_update_cycle(self):
         while True:
@@ -103,7 +98,7 @@ class App(QMainWindow):
         self.socket.send(serialized_object)
 
     def create_ticket(self):
-        ticket_info = {
+        ticket_info = { #may be can change it to class
             "badge_number": self.t_line_badge.text(),
             "name_officer": self.t_line_name_officer.text(),
             "name_pepole": self.t_line_name.text(),
@@ -111,18 +106,13 @@ class App(QMainWindow):
             "sum_order": self.sum_order.value(),
         }
 
-        self.ticket_information.append(ticket_info)
-
-        with open("client/ticket.json", "w") as file:
-            json.dump(self.ticket_information, file)
-
-        with open("client/ticket_give.txt", "w") as file:
+        with open("ticket_give.txt", "w") as file:
             file.write(
                 f"Name officer: {ticket_info['name_officer']}, badge number: {ticket_info['badge_number']}\n"
                 f"\nName citizen: {ticket_info['name_pepole']}\n\n"
                 f"Sum order: ${ticket_info['sum_order']}\n\n")
 
-        subprocess.run(["notepad", "client/ticket_give.txt"])
+        subprocess.run(["notepad", "ticket_give.txt"])
 
     def add_number(self):
         number = self.line_number.text()
