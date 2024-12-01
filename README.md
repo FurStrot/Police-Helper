@@ -24,4 +24,4 @@ When using the application, if you register a car or request information by car 
 python -m pip install -r path/to/requirements.txt
 ```
 ## О приложении
-When using the application, if you register a car or request information by car number, you send a request to the server. Fines work offline.
+При использовании приложения, если вы регистрируете автомобиль или запрашиваете информацию по номеру автомобиля, вы отправляете запрос на сервер. Штрафы работают в оффлайне.
