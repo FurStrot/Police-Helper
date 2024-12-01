@@ -13,7 +13,6 @@ from time import sleep
 import config
 from API.NetworkObjects import *
 
-
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
